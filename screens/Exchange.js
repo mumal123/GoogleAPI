@@ -15,8 +15,9 @@ export default class Exchange extends Component {
       requestedItemName:"",
       exchangeId:"",
       itemStatus:"",
-      docId: ""
-
+      docId: "",
+      itemValue:"",
+      currencyCode:""
     }
   }
 
@@ -33,6 +34,7 @@ export default class Exchange extends Component {
       "description" : description,
       "exchangeId"  : exchangeId,
       "item_status" : "requested",
+      "item_value"  : this.state.itemValue,
         "date"       : firebase.firestore.FieldValue.serverTimestamp()
 
      })
@@ -50,7 +52,8 @@ export default class Exchange extends Component {
 
      this.setState({
        itemName : '',
-       description :''
+       description :'',
+       itemValue : ""
      })
 
 
@@ -76,7 +79,8 @@ export default class Exchange extends Component {
       querySnapshot.forEach(doc => {
         this.setState({
           IsExchangeRequestActive:doc.data().IsExchangeRequestActive,
-          userDocId : doc.id
+          userDocId : doc.id,
+          currencyCode: doc.data().currency_code
         })
       })
     })
@@ -94,16 +98,29 @@ export default class Exchange extends Component {
             exchangeId : doc.data().exchangeId,
             requestedItemName: doc.data().item_name,
             itemStatus:doc.data().item_status,
+            itemValue : doc.data().item_value,
             docId     : doc.id
           })
         }
       })
   })
 }
+getData(){
+  fetch("http://data.fixer.io/api/latest?access_key=1f7dd48123a05ae588283b5e13fae944&format=1")
+  .then(response=>{
+    return response.json();
+  }).then(responseData =>{
+    var currencyCode = this.state.currencyCode
+    var currency = responseData.rates.INR
+    var value =  69 / currency
+    console.log(value);
+  })
+  }
 
   componentDidMount(){
     this.getExchangeRequest()
     this.getIsExchangeRequestActive()
+    this.getData()
 
   }
 
@@ -177,6 +194,10 @@ export default class Exchange extends Component {
          <Text>Item Name</Text>
          <Text>{this.state.requestedItemName}</Text>
          </View>
+         <View style={{borderColor:"orange",borderWidth:2,justifyContent:'center',alignItems:'center',padding:10,margin:10}}>
+         <Text> Item Value </Text>
+      <Text>{this.state.itemValue}</Text>
+      </View>
          <View style={{borderColor:"orange",borderWidth:2,justifyContent:'center',alignItems:'center',padding:10,margin:10}}>
          <Text> Item Status </Text>
 
